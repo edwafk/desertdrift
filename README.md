@@ -1,1 +1,2 @@
-# desertdrift
+# Desert Drift
+Survive the sands!
