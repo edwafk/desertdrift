@@ -1,0 +1,2452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desert Drift</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Righteous&family=Share+Tech+Mono&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    overflow: hidden;
+    background: #1a1a2e;
+    font-family: 'Share Tech Mono', monospace;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  canvas { display: block; }
+
+  #hud {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 20px 30px;
+    display: none;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  #title {
+    font-family: 'Righteous', cursive;
+    font-size: 28px;
+    color: #f4a261;
+    text-shadow: 0 2px 10px rgba(244, 162, 97, 0.4), 0 0 40px rgba(244, 162, 97, 0.15);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  #lives-panel {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(244, 162, 97, 0.25);
+    border-radius: 12px;
+    padding: 10px 18px;
+    text-align: center;
+  }
+
+  #lives-value {
+    font-size: 24px;
+    letter-spacing: 4px;
+  }
+
+  #lives-label {
+    font-size: 10px;
+    color: rgba(233, 196, 106, 0.6);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  #coins-panel {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(244, 162, 97, 0.25);
+    border-radius: 12px;
+    padding: 10px 18px;
+    text-align: center;
+  }
+
+  #coins-value {
+    font-family: 'Righteous', cursive;
+    font-size: 28px;
+    color: #f1c40f;
+    line-height: 1;
+    text-shadow: 0 0 15px rgba(241, 196, 15, 0.4);
+  }
+
+  #coins-label {
+    font-size: 10px;
+    color: rgba(233, 196, 106, 0.6);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  #best-panel {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(244, 162, 97, 0.25);
+    border-radius: 12px;
+    padding: 10px 18px;
+    text-align: center;
+  }
+
+  #best-value {
+    font-family: 'Righteous', cursive;
+    font-size: 28px;
+    color: #e67e22;
+    line-height: 1;
+    text-shadow: 0 0 15px rgba(230, 126, 34, 0.3);
+  }
+
+  #best-label {
+    font-size: 10px;
+    color: rgba(233, 196, 106, 0.6);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  #worm-level {
+    font-size: 10px;
+    color: rgba(231, 76, 60, 0.7);
+    margin-top: 3px;
+    letter-spacing: 1px;
+  }
+
+  #worm-warning {
+    position: fixed;
+    top: 22%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Righteous', cursive;
+    font-size: 42px;
+    color: #e74c3c;
+    text-shadow: 0 0 30px rgba(231, 76, 60, 0.6), 0 4px 15px rgba(0,0,0,0.4);
+    pointer-events: none;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    letter-spacing: 4px;
+  }
+
+  #game-over {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 30;
+    cursor: pointer;
+  }
+
+  #game-over h1 {
+    font-family: 'Righteous', cursive;
+    font-size: 64px;
+    color: #e74c3c;
+    text-shadow: 0 0 40px rgba(231, 76, 60, 0.5);
+    letter-spacing: 6px;
+    margin-bottom: 20px;
+  }
+
+  #game-over p {
+    color: #e9c46a;
+    font-size: 16px;
+    letter-spacing: 2px;
+  }
+
+  #start-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, rgba(20,20,50,0.7) 0%, rgba(30,25,20,0.85) 50%, rgba(10,10,30,0.95) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 35;
+    cursor: pointer;
+  }
+
+  #start-screen h1 {
+    font-family: 'Righteous', cursive;
+    font-size: 72px;
+    color: #f4a261;
+    text-shadow: 0 4px 20px rgba(244, 162, 97, 0.5), 0 0 60px rgba(244, 162, 97, 0.2);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  #start-screen .subtitle {
+    font-size: 16px;
+    color: rgba(233, 196, 106, 0.9);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+
+  #start-best {
+    font-family: 'Righteous', cursive;
+    font-size: 22px;
+    color: #e67e22;
+    margin-bottom: 8px;
+    text-shadow: 0 0 15px rgba(230, 126, 34, 0.3);
+  }
+
+  #start-best.hidden { display: none; }
+
+  .start-prompt {
+    font-size: 18px;
+    color: rgba(244, 220, 150, 0.95);
+    letter-spacing: 3px;
+    margin-top: 35px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  .start-tips {
+    margin-top: 30px;
+    font-size: 13px;
+    color: rgba(233, 196, 106, 0.75);
+    letter-spacing: 1.5px;
+    text-align: center;
+    line-height: 2.2;
+  }
+
+  #drift-indicator {
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Righteous', cursive;
+    font-size: 20px;
+    color: #f39c12;
+    text-shadow: 0 0 15px rgba(243, 156, 18, 0.6);
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s;
+    letter-spacing: 3px;
+  }
+
+  #pause-btn {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(244, 162, 97, 0.3);
+    color: rgba(244, 162, 97, 0.8);
+    font-size: 18px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+    pointer-events: auto;
+    backdrop-filter: blur(5px);
+  }
+
+  #pause-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 25;
+    cursor: pointer;
+    backdrop-filter: blur(3px);
+  }
+
+  #pause-screen h1 {
+    font-family: 'Righteous', cursive;
+    font-size: 52px;
+    color: #f4a261;
+    text-shadow: 0 0 30px rgba(244, 162, 97, 0.4);
+    letter-spacing: 6px;
+    margin-bottom: 15px;
+  }
+
+  #pause-screen p {
+    color: rgba(233, 196, 106, 0.7);
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+
+  #speed-panel {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(244, 162, 97, 0.25);
+    border-radius: 12px;
+    padding: 14px 22px;
+    text-align: right;
+    min-width: 140px;
+  }
+
+  #speed-value {
+    font-family: 'Righteous', cursive;
+    font-size: 36px;
+    color: #e9c46a;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(233, 196, 106, 0.3);
+  }
+
+  #speed-unit {
+    font-size: 11px;
+    color: rgba(233, 196, 106, 0.6);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  #controls-hint {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(244, 162, 97, 0.2);
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: rgba(233, 196, 106, 0.7);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    pointer-events: none;
+    z-index: 10;
+    transition: opacity 1.5s ease;
+  }
+
+  .key {
+    display: inline-block;
+    background: rgba(244, 162, 97, 0.2);
+    border: 1px solid rgba(244, 162, 97, 0.35);
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin: 0 2px;
+    font-size: 11px;
+    color: #f4a261;
+  }
+
+  #minimap {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 150px;
+    height: 150px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(244, 162, 97, 0.25);
+    border-radius: 50%;
+    overflow: hidden;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  #minimap canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Touch Controls */
+  #touch-controls {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 200px;
+    pointer-events: none;
+    z-index: 15;
+  }
+
+  #joystick-zone {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    width: 150px;
+    height: 150px;
+    pointer-events: auto;
+    touch-action: none;
+  }
+
+  #joystick-base {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.25);
+    border: 2px solid rgba(244, 162, 97, 0.35);
+    position: absolute;
+    left: 10px; top: 10px;
+  }
+
+  #joystick-knob {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(244, 162, 97, 0.5);
+    border: 2px solid rgba(244, 162, 97, 0.7);
+    position: absolute;
+    left: 50px; top: 50px;
+    transform: translate(-50%, -50%);
+    transition: none;
+  }
+
+  #gas-btn, #brake-btn {
+    position: absolute;
+    bottom: 20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    pointer-events: auto;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Righteous', cursive;
+    font-size: 13px;
+    letter-spacing: 1px;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  #gas-btn {
+    display: none;
+  }
+
+  #brake-btn {
+    right: 20px;
+    background: rgba(231, 76, 60, 0.3);
+    border: 2px solid rgba(231, 76, 60, 0.5);
+    color: rgba(231, 76, 60, 0.9);
+  }
+
+  #brake-btn.active {
+    background: rgba(231, 76, 60, 0.5);
+  }
+
+  #pause-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 25;
+    cursor: pointer;
+  }
+
+  #pause-screen h1 {
+    font-family: 'Righteous', cursive;
+    font-size: 56px;
+    color: #f4a261;
+    text-shadow: 0 0 30px rgba(244, 162, 97, 0.4);
+    letter-spacing: 6px;
+    margin-bottom: 15px;
+  }
+
+  #pause-screen p {
+    color: #e9c46a;
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+
+  #pause-btn {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 12;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(244, 162, 97, 0.3);
+    border-radius: 8px;
+    color: rgba(244, 162, 97, 0.7);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    padding: 5px 12px;
+    cursor: pointer;
+    display: none;
+    pointer-events: auto;
+  }
+
+  #pause-btn:active { background: rgba(244, 162, 97, 0.2); }
+
+  @media (max-width: 900px), (hover: none) {
+    #touch-controls { display: block; }
+    #controls-hint { display: none; }
+    #minimap { width: 80px; height: 80px; bottom: 210px; right: 8px; }
+    #hud { padding: 10px 12px; }
+    #title { font-size: 16px; letter-spacing: 2px; }
+    #speed-panel, #lives-panel, #coins-panel, #best-panel {
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    #speed-value { font-size: 22px; }
+    #speed-unit { font-size: 9px; }
+    #lives-value { font-size: 16px; letter-spacing: 2px; }
+    #lives-label, #coins-label, #best-label { font-size: 8px; }
+    #coins-value, #best-value { font-size: 18px; }
+    #worm-level { font-size: 8px; }
+    #worm-warning { font-size: 26px; }
+    #drift-indicator { font-size: 14px; bottom: 220px; }
+    #pause-btn { display: flex; top: 12px; left: 12px; right: auto; transform: none; font-size: 16px; padding: 6px 10px; }
+    #game-over h1 { font-size: 40px; }
+    #game-over p { font-size: 12px; }
+    #final-score { font-size: 18px !important; }
+    #start-screen h1 { font-size: 40px; letter-spacing: 4px; }
+    #start-screen .subtitle { font-size: 11px; margin-bottom: 25px; }
+    #start-best { font-size: 16px; }
+    .start-prompt { font-size: 13px; }
+    .start-tips { font-size: 9px; }
+    #joystick-zone { width: 120px; height: 120px; }
+    #joystick-base { width: 100px; height: 100px; left: 10px; top: 10px; }
+    #joystick-knob { width: 40px; height: 40px; left: 60px; top: 60px; }
+    #brake-btn { width: 65px; height: 65px; font-size: 11px; }
+    #brake-btn { right: 98px; }
+  }
+
+  @media (max-width: 480px) {
+    #title { font-size: 13px; }
+    #hud { padding: 8px 8px; gap: 4px; }
+    #hud > div:last-child { gap: 6px !important; }
+    #speed-panel, #lives-panel, #coins-panel, #best-panel {
+      padding: 4px 7px;
+      border-radius: 6px;
+    }
+    #speed-value { font-size: 18px; }
+    #coins-value, #best-value { font-size: 15px; }
+    #lives-value { font-size: 13px; }
+    #minimap { width: 65px; height: 65px; bottom: 195px; right: 6px; }
+    #brake-btn { width: 55px; height: 55px; font-size: 10px; bottom: 15px; right: 12px; }
+    #brake-btn { right: 78px; }
+    #joystick-zone { width: 100px; height: 100px; left: 10px; bottom: 10px; }
+    #joystick-base { width: 85px; height: 85px; left: 7px; top: 7px; }
+    #joystick-knob { width: 34px; height: 34px; left: 50px; top: 50px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="start-screen">
+  <h1>Desert Drift</h1>
+  <div class="subtitle">survive the sands</div>
+  <div id="start-best" class="hidden">🏆 Best: <span id="start-best-val">0</span> coins</div>
+  <div class="start-prompt">Press any key or tap to start</div>
+  <div class="start-tips">
+    🪙 Collect coins · 🐛 Dodge sandworms · 💨 Auto-drift at high speed<br>
+    WASD / Arrows to drive · SPACE to brake
+  </div>
+</div>
+
+<div id="pause-screen">
+  <h1>PAUSED</h1>
+  <p>Press <span class="key" style="display:inline-block;background:rgba(244,162,97,0.2);border:1px solid rgba(244,162,97,0.35);border-radius:4px;padding:2px 7px;color:#f4a261;">ESC</span> or tap to resume</p>
+</div>
+
+<button id="pause-btn">⏸</button>
+
+<div id="pause-screen">
+  <h1>PAUSED</h1>
+  <p>Press <span style="display:inline-block;background:rgba(244,162,97,0.2);border:1px solid rgba(244,162,97,0.35);border-radius:4px;padding:2px 7px;color:#f4a261;">ESC</span> or tap to resume</p>
+</div>
+
+<div id="drift-indicator">🔥 DRIFT</div>
+
+<div id="hud">
+  <div id="title">Desert Drift</div>
+  <div style="display:flex;gap:12px;align-items:flex-start;">
+    <div id="lives-panel">
+      <div id="lives-value">❤️❤️❤️❤️❤️</div>
+      <div id="lives-label">lives</div>
+    </div>
+    <div id="coins-panel">
+      <div id="coins-value">0</div>
+      <div id="coins-label">coins</div>
+      <div id="worm-level">🐛 ×1</div>
+    </div>
+    <div id="best-panel">
+      <div id="best-value">0</div>
+      <div id="best-label">best</div>
+    </div>
+    <div id="speed-panel">
+      <div id="speed-value">0</div>
+      <div id="speed-unit">km/h</div>
+    </div>
+  </div>
+</div>
+
+<div id="worm-warning">⚠ SANDWORM ⚠</div>
+
+<div id="game-over">
+  <h1>GAME OVER</h1>
+  <p id="final-score" style="font-family:'Righteous',cursive;font-size:24px;color:#f1c40f;margin-bottom:12px;"></p>
+  <p>The desert claims another soul... Press <span class="key" style="display:inline-block;background:rgba(244,162,97,0.2);border:1px solid rgba(244,162,97,0.35);border-radius:4px;padding:2px 7px;color:#f4a261;">R</span> or tap to restart</p>
+</div>
+
+<div id="controls-hint">
+  <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> or <span class="key">↑</span><span class="key">←</span><span class="key">↓</span><span class="key">→</span> to drive &nbsp;·&nbsp; <span class="key">SPACE</span> brake &nbsp;·&nbsp; auto-drift at high speed
+</div>
+
+<div id="minimap"><canvas id="minimap-canvas" width="150" height="150"></canvas></div>
+
+<div id="touch-controls">
+  <div id="joystick-zone">
+    <div id="joystick-base"></div>
+    <div id="joystick-knob"></div>
+  </div>
+  <div id="gas-btn">GAS</div>
+  <div id="brake-btn">BRAKE</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── Scene Setup ──
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87CEEB);
+scene.fog = new THREE.Fog(0xd4a76a, 160, 500);
+
+const frustumSize = 40;
+const aspect = window.innerWidth / window.innerHeight;
+const camera = new THREE.OrthographicCamera(
+  -frustumSize * aspect / 2, frustumSize * aspect / 2,
+  frustumSize / 2, -frustumSize / 2, 0.1, 500
+);
+
+// Isometric angle
+camera.position.set(60, 60, 60);
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.prepend(renderer.domElement);
+
+// ── Lighting ──
+const ambientLight = new THREE.AmbientLight(0xffe0b2, 0.4);
+scene.add(ambientLight);
+
+const sunLight = new THREE.DirectionalLight(0xfff3e0, 0.7);
+sunLight.position.set(50, 80, 30);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.width = 2048;
+sunLight.shadow.mapSize.height = 2048;
+sunLight.shadow.camera.near = 0.5;
+sunLight.shadow.camera.far = 400;
+sunLight.shadow.camera.left = -120;
+sunLight.shadow.camera.right = 120;
+sunLight.shadow.camera.top = 120;
+sunLight.shadow.camera.bottom = -120;
+scene.add(sunLight);
+
+const hemiLight = new THREE.HemisphereLight(0x87CEEB, 0xd4a76a, 0.3);
+scene.add(hemiLight);
+
+// ── Day/Night Cycle ──
+const DAY_DURATION = 50;   // 50s total cycle (30s day, 20s night approx)
+let dayTime = 0;           // start at 0 = full day
+let isNight = false;
+
+// Colors for day/night interpolation
+const dayBg = new THREE.Color(0x87CEEB);
+const nightBg = new THREE.Color(0x1a1a4e);
+const dayFog = new THREE.Color(0xd4a76a);
+const nightFog = new THREE.Color(0x2a2a55);
+const daySun = new THREE.Color(0xfff3e0);
+const nightSun = new THREE.Color(0x556688);
+const dayAmbient = new THREE.Color(0xffe0b2);
+const nightAmbient = new THREE.Color(0x445566);
+
+// ── Materials ──
+const mat = {
+  sand: new THREE.MeshLambertMaterial({ color: 0xe8c170 }),
+  sandDark: new THREE.MeshLambertMaterial({ color: 0xd4a76a }),
+  carBody: new THREE.MeshPhongMaterial({ color: 0xc0392b, flatShading: true }),
+  carRoof: new THREE.MeshPhongMaterial({ color: 0xa93226, flatShading: true }),
+  wheel: new THREE.MeshPhongMaterial({ color: 0x2c3e50, flatShading: true }),
+  window: new THREE.MeshPhongMaterial({ color: 0x5dade2, flatShading: true, transparent: true, opacity: 0.7 }),
+  bumper: new THREE.MeshPhongMaterial({ color: 0x7f8c8d, flatShading: true }),
+  headlight: new THREE.MeshPhongMaterial({ color: 0xf9e79f, emissive: 0xf9e79f, emissiveIntensity: 0.5 }),
+  taillight: new THREE.MeshPhongMaterial({ color: 0xe74c3c, emissive: 0xe74c3c, emissiveIntensity: 0.3 }),
+  cactus: new THREE.MeshPhongMaterial({ color: 0x27ae60, flatShading: true }),
+  cactusDark: new THREE.MeshPhongMaterial({ color: 0x1e8449, flatShading: true }),
+  rock: new THREE.MeshPhongMaterial({ color: 0x99896b, flatShading: true }),
+  rockDark: new THREE.MeshPhongMaterial({ color: 0x7d6e56, flatShading: true }),
+  skull: new THREE.MeshPhongMaterial({ color: 0xf5f0e1, flatShading: true }),
+  bush: new THREE.MeshPhongMaterial({ color: 0x8d6e3f, flatShading: true }),
+};
+
+// ── Ground ──
+const WORLD_SIZE = 600; // spawn radius for objects
+const groundGeo = new THREE.PlaneGeometry(2000, 2000, 1, 1);
+const ground = new THREE.Mesh(groundGeo, mat.sand);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Sand dunes — mix of big dunes and small dunette
+const dunes = [];
+
+// Big dunes (many)
+for (let i = 0; i < 50; i++) {  const radius = 10 + Math.random() * 10;
+  const duneGeo = new THREE.SphereGeometry(radius, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2);
+  const dune = new THREE.Mesh(duneGeo, Math.random() > 0.5 ? mat.sand : mat.sandDark);
+  const px = (Math.random() - 0.5) * WORLD_SIZE * 0.7;
+  const pz = (Math.random() - 0.5) * WORLD_SIZE * 0.7;
+  const heightScale = 0.1 + Math.random() * 0.06;
+  dune.position.set(px, 0, pz);
+  dune.scale.y = heightScale;
+  dune.receiveShadow = true;
+  scene.add(dune);
+  dunes.push({ x: px, z: pz, radius, height: radius * heightScale, mesh: dune });
+}
+
+// Small dunette (scattered)
+for (let i = 0; i < 80; i++) {
+  const radius = 3 + Math.random() * 5;
+  const duneGeo = new THREE.SphereGeometry(radius, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2);
+  const dune = new THREE.Mesh(duneGeo, Math.random() > 0.5 ? mat.sand : mat.sandDark);
+  const px = (Math.random() - 0.5) * WORLD_SIZE * 0.8;
+  const pz = (Math.random() - 0.5) * WORLD_SIZE * 0.8;
+  const heightScale = 0.06 + Math.random() * 0.05;
+  dune.position.set(px, 0, pz);
+  dune.scale.y = heightScale;
+  dune.receiveShadow = true;
+  scene.add(dune);
+  dunes.push({ x: px, z: pz, radius, height: radius * heightScale, mesh: dune });
+}
+
+// Get terrain height at any (x,z) position — smooth cosine curve, always >= 0
+function getTerrainHeight(x, z) {
+  let h = 0;
+  for (const d of dunes) {
+    const dist = Math.sqrt((x - d.x) ** 2 + (z - d.z) ** 2);
+    if (dist < d.radius) {
+      const ratio = dist / d.radius;
+      const duneH = d.height * 0.5 * (1 + Math.cos(Math.PI * ratio));
+      if (duneH > h) h = duneH;
+    }
+  }
+  return h; // 0 on flat ground, positive on dunes
+}
+
+// ── Car ──
+const car = new THREE.Group();
+
+// Body
+const bodyGeo = new THREE.BoxGeometry(2.4, 0.8, 1.4);
+const body = new THREE.Mesh(bodyGeo, mat.carBody);
+body.position.y = 0.55;
+body.castShadow = true;
+car.add(body);
+
+// Cabin/Roof
+const cabinGeo = new THREE.BoxGeometry(1.3, 0.7, 1.25);
+const cabin = new THREE.Mesh(cabinGeo, mat.carRoof);
+cabin.position.set(-0.1, 1.1, 0);
+cabin.castShadow = true;
+car.add(cabin);
+
+// Windshield
+const windGeo = new THREE.BoxGeometry(0.05, 0.55, 1.1);
+const windshield = new THREE.Mesh(windGeo, mat.window);
+windshield.position.set(0.58, 1.05, 0);
+windshield.rotation.z = 0.2;
+car.add(windshield);
+
+// Rear window
+const rearWind = new THREE.Mesh(windGeo, mat.window);
+rearWind.position.set(-0.72, 1.05, 0);
+rearWind.rotation.z = -0.2;
+car.add(rearWind);
+
+// Bumpers
+const bumperGeo = new THREE.BoxGeometry(0.15, 0.3, 1.5);
+const frontBumper = new THREE.Mesh(bumperGeo, mat.bumper);
+frontBumper.position.set(1.25, 0.4, 0);
+car.add(frontBumper);
+
+const rearBumper = new THREE.Mesh(bumperGeo, mat.bumper);
+rearBumper.position.set(-1.25, 0.4, 0);
+car.add(rearBumper);
+
+// Headlights
+const hlGeo = new THREE.BoxGeometry(0.1, 0.15, 0.3);
+const hl1 = new THREE.Mesh(hlGeo, mat.headlight);
+hl1.position.set(1.3, 0.55, 0.45);
+car.add(hl1);
+const hl2 = new THREE.Mesh(hlGeo, mat.headlight);
+hl2.position.set(1.3, 0.55, -0.45);
+car.add(hl2);
+
+// Taillights
+const tl1 = new THREE.Mesh(hlGeo, mat.taillight);
+tl1.position.set(-1.3, 0.55, 0.45);
+car.add(tl1);
+const tl2 = new THREE.Mesh(hlGeo, mat.taillight);
+tl2.position.set(-1.3, 0.55, -0.45);
+car.add(tl2);
+
+// Headlight spot lights (attached to car, off by default)
+const headlightL = new THREE.SpotLight(0xfff5cc, 0, 25, Math.PI * 0.25, 0.5, 1.5);
+headlightL.position.set(1.5, 0.6, 0.45);
+headlightL.target.position.set(10, 0, 0.45);
+car.add(headlightL);
+car.add(headlightL.target);
+
+const headlightR = new THREE.SpotLight(0xfff5cc, 0, 25, Math.PI * 0.25, 0.5, 1.5);
+headlightR.position.set(1.5, 0.6, -0.45);
+headlightR.target.position.set(10, 0, -0.45);
+car.add(headlightR);
+car.add(headlightR.target);
+
+function updateDayNight(delta) {
+  dayTime = (dayTime + delta / DAY_DURATION) % 1;
+  // Asymmetric: day lasts ~60% (30s), night ~40% (20s)
+  // Use power curve to make day longer, night shorter
+  const rawCycle = (Math.sin((dayTime - 0.25) * Math.PI * 2) + 1) / 2;
+  const nightFactor = rawCycle;
+  isNight = nightFactor > 0.5;
+
+  scene.background.copy(dayBg).lerp(nightBg, nightFactor);
+  scene.fog.color.copy(dayFog).lerp(nightFog, nightFactor);
+
+  sunLight.intensity = 0.7 - nightFactor * 0.4;
+  sunLight.color.copy(daySun).lerp(nightSun, nightFactor);
+  ambientLight.intensity = 0.4 - nightFactor * 0.15;
+  ambientLight.color.copy(dayAmbient).lerp(nightAmbient, nightFactor);
+  hemiLight.intensity = 0.3 - nightFactor * 0.1;
+
+  const headlightIntensity = Math.max(0, (nightFactor - 0.3) / 0.3) * 2.5;
+  headlightL.intensity = headlightIntensity;
+  headlightR.intensity = headlightIntensity;
+  mat.headlight.emissiveIntensity = 0.5 + headlightIntensity * 0.8;
+}
+
+// Wheels
+const wheelGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.2, 8);
+const wheelPositions = [
+  [0.7, 0.25, 0.75], [0.7, 0.25, -0.75],
+  [-0.7, 0.25, 0.75], [-0.7, 0.25, -0.75]
+];
+const wheels = [];
+wheelPositions.forEach(([x, y, z]) => {
+  const wheel = new THREE.Mesh(wheelGeo, mat.wheel);
+  wheel.position.set(x, y, z);
+  wheel.rotation.x = Math.PI / 2;
+  wheel.castShadow = true;
+  car.add(wheel);
+  wheels.push(wheel);
+});
+
+car.position.y = 0.1;
+scene.add(car);
+
+// ── World Objects ──
+const obstacles = [];
+
+function createCactus(x, z) {
+  const g = new THREE.Group();
+  // Main trunk
+  const h = 1.5 + Math.random() * 2.5;
+  const trunkGeo = new THREE.CylinderGeometry(0.2, 0.3, h, 6);
+  const trunk = new THREE.Mesh(trunkGeo, mat.cactus);
+  trunk.position.y = h / 2;
+  trunk.castShadow = true;
+  g.add(trunk);
+
+  // Arms
+  if (Math.random() > 0.3) {
+    const armH = 0.5 + Math.random() * 1;
+    const armGeo = new THREE.CylinderGeometry(0.12, 0.18, armH, 5);
+    const arm = new THREE.Mesh(armGeo, mat.cactusDark);
+    arm.position.set(0.35, h * 0.6, 0);
+    arm.rotation.z = -0.8 + Math.random() * 0.3;
+    arm.castShadow = true;
+    g.add(arm);
+  }
+  if (Math.random() > 0.5) {
+    const armH = 0.4 + Math.random() * 0.8;
+    const armGeo = new THREE.CylinderGeometry(0.1, 0.15, armH, 5);
+    const arm = new THREE.Mesh(armGeo, mat.cactus);
+    arm.position.set(-0.3, h * 0.45, 0);
+    arm.rotation.z = 0.7 + Math.random() * 0.3;
+    arm.castShadow = true;
+    g.add(arm);
+  }
+
+  g.position.set(x, 0, z);
+  g.rotation.y = Math.random() * Math.PI * 2;
+  scene.add(g);
+  obstacles.push({ pos: new THREE.Vector2(x, z), radius: 0.8, type: 'cactus', mesh: g });
+}
+
+function createRock(x, z) {
+  const size = 0.5 + Math.random() * 1.5;
+  const geo = new THREE.DodecahedronGeometry(size, 0);
+  const rock = new THREE.Mesh(geo, Math.random() > 0.5 ? mat.rock : mat.rockDark);
+  rock.position.set(x, size * 0.3, z);
+  rock.scale.y = 0.4 + Math.random() * 0.3;
+  rock.rotation.y = Math.random() * Math.PI;
+  rock.castShadow = true;
+  rock.receiveShadow = true;
+  scene.add(rock);
+  obstacles.push({ pos: new THREE.Vector2(x, z), radius: size * 0.8, type: 'rock', mesh: rock });
+}
+
+function createSkull(x, z) {
+  const g = new THREE.Group();
+  const headGeo = new THREE.SphereGeometry(0.25, 6, 5);
+  const head = new THREE.Mesh(headGeo, mat.skull);
+  head.scale.set(1, 0.8, 1.1);
+  head.position.y = 0.2;
+  g.add(head);
+  const jawGeo = new THREE.BoxGeometry(0.2, 0.08, 0.22);
+  const jaw = new THREE.Mesh(jawGeo, mat.skull);
+  jaw.position.set(0.1, 0.08, 0);
+  g.add(jaw);
+  g.position.set(x, 0, z);
+  g.rotation.y = Math.random() * Math.PI * 2;
+  scene.add(g);
+}
+
+function createTumbleweed(x, z) {
+  const size = 0.3 + Math.random() * 0.5;
+  const geo = new THREE.IcosahedronGeometry(size, 0);
+  const tw = new THREE.Mesh(geo, mat.bush);
+  tw.position.set(x, size, z);
+  scene.add(tw);
+  return tw;
+}
+
+// Check if a position overlaps with any dune
+function isOnDune(x, z, margin) {
+  margin = margin || 2;
+  for (const d of dunes) {
+    const dist = Math.sqrt((x - d.x) ** 2 + (z - d.z) ** 2);
+    if (dist < d.radius + margin) return true;
+  }
+  return false;
+}
+
+// Place objects, keeping clear zone around spawn AND away from dunes
+const clearZone = 8;
+for (let i = 0; i < 300; i++) {
+  let x, z, tries = 0;
+  do {
+    x = (Math.random() - 0.5) * WORLD_SIZE * 0.85;
+    z = (Math.random() - 0.5) * WORLD_SIZE * 0.85;
+    tries++;
+  } while ((Math.abs(x) < clearZone && Math.abs(z) < clearZone || isOnDune(x, z)) && tries < 50);
+  if (tries < 50) createCactus(x, z);
+}
+
+for (let i = 0; i < 220; i++) {
+  let x, z, tries = 0;
+  do {
+    x = (Math.random() - 0.5) * WORLD_SIZE * 0.85;
+    z = (Math.random() - 0.5) * WORLD_SIZE * 0.85;
+    tries++;
+  } while ((Math.abs(x) < clearZone && Math.abs(z) < clearZone || isOnDune(x, z)) && tries < 50);
+  if (tries < 50) createRock(x, z);
+}
+
+for (let i = 0; i < 40; i++) {
+  createSkull(
+    (Math.random() - 0.5) * WORLD_SIZE * 0.7,
+    (Math.random() - 0.5) * WORLD_SIZE * 0.7
+  );
+}
+
+const tumbleweeds = [];
+for (let i = 0; i < 25; i++) {
+  const tw = createTumbleweed(
+    (Math.random() - 0.5) * WORLD_SIZE * 0.6,
+    (Math.random() - 0.5) * WORLD_SIZE * 0.6
+  );
+  tumbleweeds.push({
+    mesh: tw,
+    vx: (Math.random() - 0.5) * 3,
+    vz: (Math.random() - 0.5) * 3
+  });
+}
+
+// ── Camels ──
+const camelMat = new THREE.MeshPhongMaterial({ color: 0xc4956a, flatShading: true });
+const camelDarkMat = new THREE.MeshPhongMaterial({ color: 0x8b6914, flatShading: true });
+const camelBagMat = new THREE.MeshPhongMaterial({ color: 0xcc3333, flatShading: true });
+const camelBagMat2 = new THREE.MeshPhongMaterial({ color: 0x2255aa, flatShading: true });
+
+function createCamelMesh() {
+  const g = new THREE.Group();
+  // Body
+  const body = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.0, 1.0), camelMat);
+  body.position.y = 1.8;
+  body.castShadow = true;
+  g.add(body);
+  // Hump
+  const hump = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 5), camelMat);
+  hump.position.set(0.2, 2.5, 0);
+  hump.scale.set(1, 0.8, 0.7);
+  g.add(hump);
+  // Neck
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 1.4, 6), camelMat);
+  neck.position.set(1.2, 2.6, 0);
+  neck.rotation.z = 0.5;
+  g.add(neck);
+  // Head
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.35, 0.4), camelDarkMat);
+  head.position.set(1.8, 3.2, 0);
+  g.add(head);
+  // Eyes
+  const eyeGeo = new THREE.SphereGeometry(0.06, 4, 4);
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+  const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+  eyeL.position.set(2.0, 3.3, 0.2);
+  g.add(eyeL);
+  const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+  eyeR.position.set(2.0, 3.3, -0.2);
+  g.add(eyeR);
+  // Legs (4)
+  const legGeo = new THREE.CylinderGeometry(0.12, 0.1, 1.4, 5);
+  [[-0.7, 0, 0.35], [-0.7, 0, -0.35], [0.7, 0, 0.35], [0.7, 0, -0.35]].forEach(([lx, ly, lz], i) => {
+    const leg = new THREE.Mesh(legGeo, camelDarkMat);
+    leg.position.set(lx, 0.7, lz);
+    leg.castShadow = true;
+    g.add(leg);
+    g.userData['leg' + i] = leg;
+  });
+  // Bags/saddlebags
+  const bagGeo = new THREE.BoxGeometry(0.6, 0.5, 0.4);
+  const bagL = new THREE.Mesh(bagGeo, Math.random() > 0.5 ? camelBagMat : camelBagMat2);
+  bagL.position.set(-0.3, 2.1, 0.7);
+  bagL.rotation.z = 0.1;
+  g.add(bagL);
+  const bagR = new THREE.Mesh(bagGeo, Math.random() > 0.5 ? camelBagMat2 : camelBagMat);
+  bagR.position.set(-0.3, 2.1, -0.7);
+  bagR.rotation.z = -0.1;
+  g.add(bagR);
+  // Tail
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 0.6, 4), camelDarkMat);
+  tail.position.set(-1.3, 2.0, 0);
+  tail.rotation.z = -0.8;
+  g.add(tail);
+
+  g.scale.set(0.7, 0.7, 0.7); // reasonable size
+  return g;
+}
+
+const camels = [];
+const CAMEL_COUNT = 6;
+
+function spawnCamel() {
+  const mesh = createCamelMesh();
+  const angle = Math.random() * Math.PI * 2;
+  let x, z, tries = 0;
+  do {
+    x = car.position.x + (Math.random() - 0.5) * WORLD_SIZE * 0.6;
+    z = car.position.z + (Math.random() - 0.5) * WORLD_SIZE * 0.6;
+    tries++;
+  } while (isOnDune(x, z, 5) && tries < 30);
+
+  mesh.position.set(x, 0, z);
+  mesh.rotation.y = angle;
+  scene.add(mesh);
+
+  camels.push({
+    mesh,
+    walkAngle: angle,
+    speed: 1.5 + Math.random() * 1.5,
+    turnTimer: 3 + Math.random() * 6,
+    legPhase: Math.random() * Math.PI * 2
+  });
+}
+
+for (let i = 0; i < CAMEL_COUNT; i++) spawnCamel();
+
+function updateCamels(delta) {
+  camels.forEach(c => {
+    // Walk
+    c.mesh.position.x += Math.cos(c.walkAngle) * c.speed * delta;
+    c.mesh.position.z -= Math.sin(c.walkAngle) * c.speed * delta;
+    c.mesh.rotation.y = c.walkAngle;
+
+    // Animate legs
+    c.legPhase += delta * c.speed * 3;
+    for (let i = 0; i < 4; i++) {
+      const leg = c.mesh.userData['leg' + i];
+      if (leg) {
+        const offset = i < 2 ? 0 : Math.PI;
+        const side = i % 2 === 0 ? 1 : -1;
+        leg.rotation.x = Math.sin(c.legPhase + offset) * 0.25 * side;
+      }
+    }
+
+    // Terrain height
+    const th = getTerrainHeight(c.mesh.position.x, c.mesh.position.z);
+    c.mesh.position.y = Math.max(0, th);
+
+    // Random turn
+    c.turnTimer -= delta;
+    if (c.turnTimer <= 0) {
+      c.walkAngle += (Math.random() - 0.5) * 1.2;
+      c.turnTimer = 4 + Math.random() * 8;
+    }
+  });
+}
+
+function splatCamel(camel, index) {
+  const px = camel.mesh.position.x;
+  const py = camel.mesh.position.y + 1;
+  const pz = camel.mesh.position.z;
+
+  // Splatter particles — red/brown gore + bag pieces
+  const splatColors = [0xcc2222, 0x881111, 0xaa3333, 0xc4956a, 0x8b6914, 0xcc3333, 0x2255aa];
+  for (let i = 0; i < 25; i++) {
+    const size = 0.1 + Math.random() * 0.3;
+    const geo = new THREE.BoxGeometry(size, size, size);
+    const color = splatColors[Math.floor(Math.random() * splatColors.length)];
+    const debris = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ color, flatShading: true }));
+    debris.position.set(px + (Math.random() - 0.5) * 2, py + Math.random() * 1.5, pz + (Math.random() - 0.5) * 2);
+    debris.castShadow = true;
+    scene.add(debris);
+    debrisParticles.push({
+      mesh: debris,
+      vx: (Math.random() - 0.5) * 18,
+      vy: 5 + Math.random() * 12,
+      vz: (Math.random() - 0.5) * 18,
+      rotX: (Math.random() - 0.5) * 15,
+      rotZ: (Math.random() - 0.5) * 15,
+      life: 2 + Math.random() * 1.5
+    });
+  }
+
+  scene.remove(camel.mesh);
+  camels.splice(index, 1);
+
+  // +5 coins
+  totalCoins += 5;
+  updateCoinsHUD();
+  updateBestScore();
+  // Check life recovery (for each 10-coin boundary crossed)
+  if (totalCoins % 10 === 0 && lives < 5) {
+    lives++;
+    updateLivesHUD();
+  }
+
+  // Respawn a new camel after a delay
+  setTimeout(() => { if (!gameOver) spawnCamel(); }, 8000 + Math.random() * 5000);
+}
+
+function checkCamelCollisions() {
+  for (let i = camels.length - 1; i >= 0; i--) {
+    const c = camels[i];
+    const dist = Math.sqrt(
+      (car.position.x - c.mesh.position.x) ** 2 +
+      (car.position.z - c.mesh.position.z) ** 2
+    );
+    if (dist < 2.5) {
+      splatCamel(c, i);
+      carSpeed *= 0.85; // slight slowdown from impact
+      break;
+    }
+  }
+}
+
+// ── Coins System ──
+let totalCoins = 0;
+const coins = [];
+const coinMat = new THREE.MeshPhongMaterial({ color: 0xf1c40f, emissive: 0xf39c12, emissiveIntensity: 0.3, flatShading: true });
+const coinEdgeMat = new THREE.MeshPhongMaterial({ color: 0xe67e22, flatShading: true });
+
+function spawnCoin() {
+  const g = new THREE.Group();
+
+  // Flat cylinder = coin (bigger, oriented vertically)
+  const coinGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.12, 16);
+  const coin = new THREE.Mesh(coinGeo, coinMat);
+  coin.rotation.z = Math.PI / 2; // stand upright
+  g.add(coin);
+
+  // Edge ring
+  const edgeGeo = new THREE.TorusGeometry(0.8, 0.07, 8, 16);
+  const edge = new THREE.Mesh(edgeGeo, coinEdgeMat);
+  g.add(edge);
+
+  // Star on face
+  const starGeo = new THREE.CircleGeometry(0.35, 5);
+  const starMat = new THREE.MeshBasicMaterial({ color: 0xf9e79f, side: THREE.DoubleSide });
+  const star = new THREE.Mesh(starGeo, starMat);
+  star.position.x = 0.07;
+  star.rotation.y = Math.PI / 2;
+  g.add(star);
+
+  let x, z, tries = 0;
+  do {
+    x = car.position.x + (Math.random() - 0.5) * WORLD_SIZE * 0.7;
+    z = car.position.z + (Math.random() - 0.5) * WORLD_SIZE * 0.7;
+    tries++;
+  } while (isOnDune(x, z, 3) && tries < 30);
+
+  g.position.set(x, 1.5, z);
+  scene.add(g);
+  coins.push({ mesh: g, x, z, collected: false });
+}
+
+// Spawn initial coins
+for (let i = 0; i < 25; i++) spawnCoin();
+
+// Coin respawn timer
+let coinSpawnTimer = 8;
+
+function getWormLevel() {
+  return 1 + Math.floor(totalCoins / 5);
+}
+
+function updateCoinsHUD() {
+  document.getElementById('coins-value').textContent = totalCoins;
+  const level = getWormLevel();
+  document.getElementById('worm-level').textContent = '🐛 ×' + level;
+}
+
+function updateCoins(delta) {
+  // Spin all coins and check collection
+  for (let i = coins.length - 1; i >= 0; i--) {
+    const c = coins[i];
+    if (c.collected) continue;
+
+    // Spin vertically and hover
+    c.mesh.rotation.y += delta * 3;
+    c.mesh.position.y = 1.5 + Math.sin(Date.now() * 0.003 + i) * 0.3;
+
+    // Check if car is near
+    const dist = Math.sqrt(
+      (car.position.x - c.x) ** 2 + (car.position.z - c.z) ** 2
+    );
+    if (dist < 2.5) {
+      c.collected = true;
+      scene.remove(c.mesh);
+      coins.splice(i, 1);
+      totalCoins++;
+      updateCoinsHUD();
+      updateBestScore();
+
+      // Gain a life every 10 coins (max 5)
+      if (totalCoins % 10 === 0 && lives < 5) {
+        lives++;
+        updateLivesHUD();
+      }
+
+      // Mega worm when crossing a 20-coin threshold
+      const nextMegaThreshold = lastMegaTrigger + 20;
+      if (totalCoins >= nextMegaThreshold) {
+        lastMegaTrigger = nextMegaThreshold;
+        spawnMegaWorm();
+      }
+
+      // Sparkle effect
+      for (let s = 0; s < 8; s++) {
+        const spark = new THREE.Mesh(
+          new THREE.SphereGeometry(0.1, 4, 4),
+          new THREE.MeshBasicMaterial({ color: 0xf1c40f, transparent: true })
+        );
+        spark.position.set(c.x, 1.5, c.z);
+        scene.add(spark);
+        dustParticles.push({
+          mesh: spark,
+          vy: 2 + Math.random() * 3,
+          life: 0.8,
+          scale: 0.5 + Math.random()
+        });
+      }
+    }
+  }
+
+  // Respawn coins periodically — faster at night with higher cap
+  coinSpawnTimer -= delta;
+  const coinCap = isNight ? 55 : 35;
+  const coinInterval = isNight ? (1 + Math.random() * 1.5) : (2 + Math.random() * 3);
+  if (coinSpawnTimer <= 0 && coins.length < coinCap) {
+    spawnCoin();
+    if (isNight) spawnCoin();
+    coinSpawnTimer = coinInterval;
+  }
+}
+
+// ── Debris System ──
+const debrisParticles = [];
+
+function spawnDebris(x, y, z, color, count) {
+  for (let i = 0; i < count; i++) {
+    const size = 0.1 + Math.random() * 0.25;
+    const geo = new THREE.BoxGeometry(size, size, size);
+    const debris = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ color, flatShading: true }));
+    debris.position.set(x + (Math.random() - 0.5) * 1.5, y + Math.random() * 1, z + (Math.random() - 0.5) * 1.5);
+    debris.castShadow = true;
+    scene.add(debris);
+    debrisParticles.push({
+      mesh: debris,
+      vx: (Math.random() - 0.5) * 12,
+      vy: 4 + Math.random() * 8,
+      vz: (Math.random() - 0.5) * 12,
+      rotX: (Math.random() - 0.5) * 10,
+      rotZ: (Math.random() - 0.5) * 10,
+      life: 1.5 + Math.random() * 1
+    });
+  }
+}
+
+function destroyObstacle(obs, index) {
+  const color = obs.type === 'cactus' ? 0x27ae60 : 0x99896b;
+  const px = obs.mesh.position ? obs.mesh.position.x : obs.pos.x;
+  const pz = obs.mesh.position ? obs.mesh.position.z : obs.pos.y;
+  const py = obs.mesh.position ? obs.mesh.position.y : 0;
+  spawnDebris(px, py + 0.5, pz, color, obs.type === 'cactus' ? 12 : 8);
+  scene.remove(obs.mesh);
+  obstacles.splice(index, 1);
+}
+
+function updateDebris(delta) {
+  for (let i = debrisParticles.length - 1; i >= 0; i--) {
+    const d = debrisParticles[i];
+    d.life -= delta;
+    d.mesh.position.x += d.vx * delta;
+    d.mesh.position.y += d.vy * delta;
+    d.mesh.position.z += d.vz * delta;
+    d.vy -= 15 * delta; // gravity
+    d.mesh.rotation.x += d.rotX * delta;
+    d.mesh.rotation.z += d.rotZ * delta;
+    // Bounce off ground
+    if (d.mesh.position.y < 0.05) {
+      d.mesh.position.y = 0.05;
+      d.vy = Math.abs(d.vy) * 0.3;
+      d.vx *= 0.7;
+      d.vz *= 0.7;
+    }
+    if (d.life <= 0) {
+      scene.remove(d.mesh);
+      d.mesh.material.dispose();
+      d.mesh.geometry.dispose();
+      debrisParticles.splice(i, 1);
+    }
+  }
+}
+
+// ── Dust Particles ──
+const dustParticles = [];
+const dustGeo = new THREE.SphereGeometry(0.08, 4, 4);
+const dustMat = new THREE.MeshBasicMaterial({ color: 0xd4a76a, transparent: true });
+
+function spawnDust() {
+  const dust = new THREE.Mesh(dustGeo, dustMat.clone());
+  dust.position.copy(car.position);
+  dust.position.x -= Math.cos(carAngle) * 1.5 + (Math.random() - 0.5) * 0.8;
+  dust.position.z += Math.sin(carAngle) * 1.5 + (Math.random() - 0.5) * 0.8;
+  dust.position.y = 0.2 + Math.random() * 0.3;
+  scene.add(dust);
+  dustParticles.push({
+    mesh: dust,
+    vy: 0.5 + Math.random() * 1,
+    life: 1.0,
+    scale: 0.5 + Math.random() * 1
+  });
+}
+
+// ── Sky ──
+// Sun
+const sunGeo = new THREE.SphereGeometry(5, 16, 16);
+const sunMat = new THREE.MeshBasicMaterial({ color: 0xfff9c4 });
+const sun = new THREE.Mesh(sunGeo, sunMat);
+sun.position.set(80, 70, -60);
+scene.add(sun);
+
+// ── Lives System ──
+let lives = 5;
+let gameOver = false;
+let hitCooldown = 0;
+
+// Best score (persisted in localStorage for local play)
+let bestScore = 0;
+try { bestScore = parseInt(localStorage.getItem('desertDriveBest')) || 0; } catch(e) {}
+document.getElementById('best-value').textContent = bestScore;
+
+function updateBestScore() {
+  if (totalCoins > bestScore) {
+    bestScore = totalCoins;
+    try { localStorage.setItem('desertDriveBest', bestScore); } catch(e) {}
+    document.getElementById('best-value').textContent = bestScore;
+  }
+}
+
+function updateLivesHUD() {
+  const full = '❤️'.repeat(lives);
+  const empty = '🖤'.repeat(5 - lives);
+  document.getElementById('lives-value').textContent = full + empty;
+}
+
+function loseLife() {
+  if (hitCooldown > 0 || gameOver) return;
+  lives--;
+  hitCooldown = 2.0; // 2 second invulnerability
+  updateLivesHUD();
+
+  // Flash car red
+  const origColor = mat.carBody.color.getHex();
+  mat.carBody.color.setHex(0xffffff);
+  mat.carRoof.color.setHex(0xffffff);
+  setTimeout(() => { mat.carBody.color.setHex(origColor); mat.carRoof.color.setHex(0xa93226); }, 150);
+
+  if (lives <= 0) {
+    gameOver = true;
+    updateBestScore();
+    const isNew = totalCoins >= bestScore;
+    document.getElementById('final-score').textContent = '🪙 ' + totalCoins + (isNew ? ' — NEW BEST!' : ' · Best: ' + bestScore);
+    document.getElementById('game-over').style.display = 'flex';
+    document.getElementById('pause-btn').style.display = 'none';
+  }
+}
+
+// ── Sandworm System ──
+const wormMat = new THREE.MeshPhongMaterial({ color: 0x8B5E3C, flatShading: true });
+const wormMatDark = new THREE.MeshPhongMaterial({ color: 0x6B4226, flatShading: true });
+const wormMouthMat = new THREE.MeshPhongMaterial({ color: 0xc0392b, flatShading: true });
+
+function createWormMesh() {
+  const group = new THREE.Group();
+
+  // Body segments (chain of spheres tapering) — big boi
+  const segments = 12;
+  for (let i = 0; i < segments; i++) {
+    const t = i / segments;
+    const radius = 1.4 * (1 - t * 0.6); // much bigger, taper from head to tail
+    const segGeo = new THREE.SphereGeometry(radius, 7, 6);
+    const seg = new THREE.Mesh(segGeo, i % 2 === 0 ? wormMat : wormMatDark);
+    seg.castShadow = true;
+    seg.userData.segIndex = i;
+    group.add(seg);
+  }
+
+  // Mouth (on the first segment)
+  const mouthGeo = new THREE.SphereGeometry(0.9, 8, 5, 0, Math.PI * 2, 0, Math.PI / 2);
+  const mouth = new THREE.Mesh(mouthGeo, wormMouthMat);
+  mouth.rotation.x = Math.PI;
+  mouth.position.y = 0.3;
+  group.add(mouth);
+
+  // "Teeth" spikes
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const toothGeo = new THREE.ConeGeometry(0.12, 0.5, 4);
+    const tooth = new THREE.Mesh(toothGeo, new THREE.MeshPhongMaterial({ color: 0xf5f0e1, flatShading: true }));
+    tooth.position.set(Math.cos(angle) * 0.7, 0.7, Math.sin(angle) * 0.7);
+    tooth.rotation.x = Math.PI;
+    group.add(tooth);
+  }
+
+  return group;
+}
+
+const worms = []; // active worms
+let wormTimer = 5 + Math.random() * 5; // first worm in 5-10s
+
+const sandBurstParticles = [];
+const sandBurstGeo = new THREE.SphereGeometry(0.15, 4, 4);
+const sandBurstMat = new THREE.MeshBasicMaterial({ color: 0xd4a76a, transparent: true });
+
+function spawnSandBurst(x, y, z, count) {
+  for (let i = 0; i < count; i++) {
+    const p = new THREE.Mesh(sandBurstGeo, sandBurstMat.clone());
+    p.position.set(x + (Math.random() - 0.5) * 2, y, z + (Math.random() - 0.5) * 2);
+    scene.add(p);
+    sandBurstParticles.push({
+      mesh: p,
+      vx: (Math.random() - 0.5) * 8,
+      vy: 3 + Math.random() * 6,
+      vz: (Math.random() - 0.5) * 8,
+      life: 1.0
+    });
+  }
+}
+
+function spawnWorm() {
+  const mesh = createWormMesh();
+  scene.add(mesh);
+
+  // Spawn ahead of the car's path, offset to one side
+  const spawnDist = 20 + Math.random() * 15;
+  const sideOffset = (Math.random() - 0.5) * 0.6; // slight side variation
+  const spawnAngle = carAngle + sideOffset;
+  const startX = car.position.x + Math.cos(spawnAngle) * spawnDist;
+  const startZ = car.position.z - Math.sin(spawnAngle) * spawnDist;
+
+  // Arc lands toward the car's current position (slight lead)
+  const lead = carSpeed * 15;
+  const endX = car.position.x + Math.cos(carAngle) * lead + (Math.random() - 0.5) * 4;
+  const endZ = car.position.z - Math.sin(carAngle) * lead + (Math.random() - 0.5) * 4;
+
+  // Worm faces from start → end (head first toward car)
+  const travelAngle = Math.atan2(startX - endX, startZ - endZ);
+
+  const worm = {
+    mesh,
+    startX, startZ,
+    endX, endZ,
+    travelAngle,
+    arcHeight: 8 + Math.random() * 6,
+    progress: 0,
+    duration: isNight ? (0.7 + Math.random() * 0.3) : (1.2 + Math.random() * 0.5),
+    hasHit: false,
+    burstSpawned: false,
+    endBurstSpawned: false,
+  };
+
+  worms.push(worm);
+
+  // Show warning (don't overwrite mega worm warning while active)
+  const warn = document.getElementById('worm-warning');
+  if (!megaWorm) {
+    warn.textContent = '⚠ SANDWORM ⚠';
+    warn.style.color = '#e74c3c';
+    warn.style.fontSize = '42px';
+  }
+  warn.style.opacity = '1';
+  setTimeout(() => { warn.style.opacity = '0'; }, 1200);
+}
+
+function updateWorms(delta) {
+  // Worm spawn timer — scales with coins collected
+  if (!gameOver) {
+    wormTimer -= delta;
+    if (wormTimer <= 0) {
+      const level = getWormLevel();
+      // Spawn 1 worm per level (e.g. 10 coins = level 3 = 3 worms at once)
+      const wormsToSpawn = Math.min(level, 5); // cap at 5 simultaneous
+      for (let w = 0; w < wormsToSpawn; w++) {
+        setTimeout(() => spawnWorm(), w * 400); // slight stagger
+      }
+      // Timer gets shorter with more coins too — even shorter at night
+      const baseTime = Math.max(3, 8 - level * 0.8);
+      const nightMult = isNight ? 0.5 : 1;
+      wormTimer = (baseTime + Math.random() * 5) * nightMult;
+    }
+  }
+
+  for (let i = worms.length - 1; i >= 0; i--) {
+    const w = worms[i];
+    w.progress += delta / w.duration;
+
+    if (w.progress >= 1) {
+      // Done — remove
+      scene.remove(w.mesh);
+      worms.splice(i, 1);
+      continue;
+    }
+
+    const t = w.progress;
+
+    // Parabolic arc: x/z linear interpolation, y = parabola
+    const currentX = w.startX + (w.endX - w.startX) * t;
+    const currentZ = w.startZ + (w.endZ - w.startZ) * t;
+    const currentY = w.arcHeight * 4 * t * (1 - t) - 1; // parabola, dips below ground at start/end
+
+    // Sand burst when emerging
+    if (t > 0.05 && !w.burstSpawned) {
+      w.burstSpawned = true;
+      spawnSandBurst(w.startX, 0, w.startZ, 20);
+    }
+    // Sand burst when diving back
+    if (t > 0.85 && !w.endBurstSpawned) {
+      w.endBurstSpawned = true;
+      spawnSandBurst(w.endX, 0, w.endZ, 20);
+    }
+
+    // Position worm segments along arc with trailing effect
+    const segments = w.mesh.children;
+    for (let s = 0; s < segments.length; s++) {
+      const seg = segments[s];
+      if (seg.userData.segIndex === undefined) {
+        // mouth/teeth — follow head
+        seg.position.set(0, 0, 0);
+        continue;
+      }
+      const segT = Math.max(0, t - seg.userData.segIndex * 0.02);
+      const sx = w.startX + (w.endX - w.startX) * segT;
+      const sz = w.startZ + (w.endZ - w.startZ) * segT;
+      const sy = w.arcHeight * 4 * segT * (1 - segT) - 1;
+      seg.position.set(sx - currentX, sy - currentY, sz - currentZ);
+    }
+
+    // Hide if underground
+    w.mesh.position.set(currentX, Math.max(currentY, -2), currentZ);
+    w.mesh.visible = currentY > -1.5;
+
+    // Point worm head-first along travel direction with pitch following arc
+    w.mesh.rotation.y = w.travelAngle;
+    // Pitch: nose up when rising, nose down when falling
+    const arcSlope = w.arcHeight * 4 * (1 - 2 * t); // derivative of parabola
+    w.mesh.rotation.x = Math.atan2(arcSlope, 10) * 0.5;
+
+    // Collision with car — only when near ground (emerging/landing), not mid-flight
+    const nearGround = currentY > -0.5 && currentY < 2.5;
+    if (!w.hasHit && nearGround) {
+      const distToCar = Math.sqrt(
+        (currentX - car.position.x) ** 2 + (currentZ - car.position.z) ** 2
+      );
+      if (distToCar < 3.0) {
+        w.hasHit = true;
+        loseLife();
+        carSpeed *= -0.5;
+      }
+    }
+  }
+
+  // Update sand burst particles
+  for (let i = sandBurstParticles.length - 1; i >= 0; i--) {
+    const p = sandBurstParticles[i];
+    p.life -= delta * 1.5;
+    p.mesh.position.x += p.vx * delta;
+    p.mesh.position.y += p.vy * delta;
+    p.mesh.position.z += p.vz * delta;
+    p.vy -= 12 * delta; // gravity
+    p.mesh.material.opacity = p.life * 0.8;
+    p.mesh.scale.setScalar(1 + (1 - p.life) * 0.5);
+    if (p.life <= 0) {
+      scene.remove(p.mesh);
+      p.mesh.material.dispose();
+      sandBurstParticles.splice(i, 1);
+    }
+  }
+}
+
+// ── Mega Sandworm (chases player, serpentine, triggered every 20 coins) ──
+const megaWormMat = new THREE.MeshPhongMaterial({ color: 0x5C3A1E, flatShading: true });
+const megaWormMatDark = new THREE.MeshPhongMaterial({ color: 0x3B2210, flatShading: true });
+const megaWormMouthMat = new THREE.MeshPhongMaterial({ color: 0xaa1111, flatShading: true });
+
+let megaWorm = null;
+let lastMegaTrigger = 0;
+
+const MEGA_SEG_COUNT = 18;
+const MEGA_SEG_SPACING = 2.8; // distance between segments
+
+function spawnMegaWorm() {
+  if (megaWorm) return;
+
+  // Spawn behind the car
+  const spawnAngle = carAngle + Math.PI;
+  const dist = 35;
+  const sx = car.position.x + Math.cos(spawnAngle) * dist;
+  const sz = car.position.z - Math.sin(spawnAngle) * dist;
+
+  // Create individual segment meshes (each in scene, not grouped)
+  const segs = [];
+  for (let i = 0; i < MEGA_SEG_COUNT; i++) {
+    const t = i / MEGA_SEG_COUNT;
+    const radius = 2.2 * (1 - t * 0.55);
+    const seg = new THREE.Mesh(
+      new THREE.SphereGeometry(radius, 8, 6),
+      i % 2 === 0 ? megaWormMat : megaWormMatDark
+    );
+    seg.castShadow = true;
+    // Spread out behind spawn
+    const segX = sx - Math.cos(spawnAngle) * i * MEGA_SEG_SPACING;
+    const segZ = sz + Math.sin(spawnAngle) * i * MEGA_SEG_SPACING;
+    seg.position.set(segX, -1.5, segZ);
+    scene.add(seg);
+    segs.push({ mesh: seg, x: segX, z: segZ, y: -1.5 });
+  }
+
+  // Head decoration: mouth + teeth on first segment
+  const mouth = new THREE.Mesh(
+    new THREE.SphereGeometry(1.6, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2),
+    megaWormMouthMat
+  );
+  mouth.rotation.x = Math.PI;
+  segs[0].mesh.add(mouth);
+  mouth.position.y = 0.4;
+
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * Math.PI * 2;
+    const tooth = new THREE.Mesh(
+      new THREE.ConeGeometry(0.15, 0.7, 4),
+      new THREE.MeshPhongMaterial({ color: 0xf5f0e1, flatShading: true })
+    );
+    tooth.position.set(Math.cos(a) * 1.3, 0.9, Math.sin(a) * 1.3);
+    tooth.rotation.x = Math.PI;
+    segs[0].mesh.add(tooth);
+  }
+
+  megaWorm = {
+    segs,
+    angle: spawnAngle,
+    speed: 32,
+    lifetime: 20,
+    hitCooldown: 0,
+    emerged: false,
+    emergeTimer: 1.2,
+    emergeProgress: 0
+  };
+
+  // Warning
+  const warn = document.getElementById('worm-warning');
+  warn.textContent = '⚠ MEGA WORM ⚠';
+  warn.style.opacity = '1';
+  warn.style.color = '#ff4444';
+  warn.style.fontSize = '48px';
+  setTimeout(() => { warn.style.opacity = '0'; }, 2000);
+
+  spawnSandBurst(sx, 0, sz, 35);
+}
+
+function updateMegaWorm(delta) {
+  if (!megaWorm) return;
+  const mw = megaWorm;
+  const head = mw.segs[0];
+
+  mw.lifetime -= delta;
+  if (mw.lifetime <= 0) {
+    // Despawn — dive down then remove
+    spawnSandBurst(head.x, 0, head.z, 30);
+    mw.segs.forEach(s => scene.remove(s.mesh));
+    megaWorm = null;
+    const warn = document.getElementById('worm-warning');
+    warn.style.opacity = '0';
+    warn.textContent = '⚠ SANDWORM ⚠';
+    warn.style.color = '#e74c3c';
+    warn.style.fontSize = '42px';
+    return;
+  }
+
+  // Emerge phase — segments rise from underground one by one
+  if (!mw.emerged) {
+    mw.emergeTimer -= delta;
+    mw.emergeProgress += delta * 8; // how many segments have emerged
+    for (let i = 0; i < mw.segs.length; i++) {
+      const s = mw.segs[i];
+      if (i < mw.emergeProgress) {
+        s.y = 0.5 + Math.sin(Date.now() * 0.004 + i * 0.4) * 0.8;
+      }
+      s.mesh.position.y = s.y;
+    }
+    // Rumble head
+    head.mesh.position.x = head.x + (Math.random() - 0.5) * 0.3;
+    head.mesh.position.z = head.z + (Math.random() - 0.5) * 0.3;
+    if (mw.emergeTimer <= 0) {
+      mw.emerged = true;
+      spawnSandBurst(head.x, 0, head.z, 25);
+    }
+    return;
+  }
+
+  // ── Head chases car with smooth steering ──
+  const toCarX = car.position.x - head.x;
+  const toCarZ = car.position.z - head.z;
+  const distToCar = Math.sqrt(toCarX * toCarX + toCarZ * toCarZ);
+  const targetAngle = Math.atan2(-toCarZ, toCarX);
+
+  let angleDiff = targetAngle - mw.angle;
+  while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+  while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+  // Turn rate increases when far from car (catches up), decreases when close (smoother curves)
+  const turnRate = distToCar > 20 ? 3.2 : 2.2;
+  const steer = Math.max(-turnRate, Math.min(turnRate, angleDiff * 3.0));
+  mw.angle += steer * delta;
+
+  // Speed boost when far, slow slightly when very close
+  const effectiveSpeed = distToCar > 30 ? mw.speed * 1.4 : mw.speed;
+
+  // Move head
+  head.x += Math.cos(mw.angle) * effectiveSpeed * delta;
+  head.z -= Math.sin(mw.angle) * effectiveSpeed * delta;
+  head.y = 0.5 + Math.sin(Date.now() * 0.004) * 0.8;
+
+  head.mesh.position.set(head.x, head.y, head.z);
+  head.mesh.rotation.y = mw.angle;
+
+  // ── Body follows: each segment chases the one in front ──
+  for (let i = 1; i < mw.segs.length; i++) {
+    const curr = mw.segs[i];
+    const prev = mw.segs[i - 1];
+
+    const dx = prev.x - curr.x;
+    const dz = prev.z - curr.z;
+    const d = Math.sqrt(dx * dx + dz * dz);
+
+    if (d > MEGA_SEG_SPACING) {
+      // Move toward previous segment, maintaining fixed spacing
+      const ratio = (d - MEGA_SEG_SPACING) / d;
+      curr.x += dx * ratio;
+      curr.z += dz * ratio;
+    }
+
+    // Undulate Y
+    curr.y = 0.5 + Math.sin(Date.now() * 0.004 + i * 0.4) * 0.8;
+
+    curr.mesh.position.set(curr.x, curr.y, curr.z);
+    // Point toward previous segment
+    curr.mesh.rotation.y = Math.atan2(-(prev.z - curr.z), prev.x - curr.x);
+  }
+
+  // Sand particles from head
+  if (Math.random() < 0.5) {
+    spawnSandBurst(head.x + (Math.random() - 0.5) * 2, 0, head.z + (Math.random() - 0.5) * 2, 2);
+  }
+
+  // ── Collision — head and first 8 body segments ──
+  mw.hitCooldown = Math.max(0, mw.hitCooldown - delta);
+  if (mw.hitCooldown <= 0) {
+    for (let i = 0; i < Math.min(mw.segs.length, 8); i++) {
+      const s = mw.segs[i];
+      const hitRadius = i === 0 ? 4.0 : 2.8;
+      const segDist = Math.sqrt((s.x - car.position.x) ** 2 + (s.z - car.position.z) ** 2);
+      if (segDist < hitRadius) {
+        loseLife();
+        carSpeed *= -0.4;
+        mw.hitCooldown = 2.0;
+        break;
+      }
+    }
+  }
+
+  // Flash warning when close
+  const headDist = Math.sqrt((head.x - car.position.x) ** 2 + (head.z - car.position.z) ** 2);
+  if (headDist < 18 && mw.lifetime > 1) {
+    const warn = document.getElementById('worm-warning');
+    warn.textContent = '⚠ MEGA WORM ⚠';
+    warn.style.opacity = Math.sin(Date.now() * 0.01) > 0 ? '0.7' : '0';
+  }
+}
+
+// ── Input ──
+const keys = {};
+
+function restartGame() {
+  if (!gameOver) return;
+  lives = 5;
+  gameOver = false;
+  hitCooldown = 0;
+  carSpeed = 0;
+  driftAmount = 0;
+  moveAngle = 0;
+  car.position.set(0, 0.1, 0);
+  carAngle = 0;
+  car.rotation.set(0, 0, 0);
+  car.visible = true;
+  updateLivesHUD();
+  document.getElementById('game-over').style.display = 'none';
+  document.getElementById('pause-btn').style.display = 'flex';
+  document.getElementById('drift-indicator').style.opacity = '0';
+  worms.forEach(w => scene.remove(w.mesh));
+  worms.length = 0;
+  wormTimer = 5 + Math.random() * 5;
+  if (megaWorm) { megaWorm.segs.forEach(s => scene.remove(s.mesh)); megaWorm = null; }
+  lastMegaTrigger = 0;
+  coins.forEach(c => scene.remove(c.mesh));
+  coins.length = 0;
+  totalCoins = 0;
+  updateCoinsHUD();
+  coinSpawnTimer = 0;
+  for (let i = 0; i < 25; i++) spawnCoin();
+  // Update start screen best for next time
+  if (bestScore > 0) {
+    startBestEl.classList.remove('hidden');
+    startBestValEl.textContent = bestScore;
+  }
+}
+
+window.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (e.code === 'KeyR') restartGame();
+});
+window.addEventListener('keyup', e => { keys[e.code] = false; });
+document.getElementById('game-over').addEventListener('click', restartGame);
+document.getElementById('game-over').addEventListener('touchstart', e => { e.preventDefault(); restartGame(); });
+
+// ── Touch Controls ──
+const touchState = { steerX: 0, steerY: 0, brake: false, joystickActive: false, joystickAngle: 0 };
+const joystickZone = document.getElementById('joystick-zone');
+const joystickKnob = document.getElementById('joystick-knob');
+let joystickTouchId = null;
+
+joystickZone.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const touch = e.changedTouches[0];
+  joystickTouchId = touch.identifier;
+  handleJoystickMove(touch);
+}, { passive: false });
+
+joystickZone.addEventListener('touchmove', e => {
+  e.preventDefault();
+  for (const touch of e.changedTouches) {
+    if (touch.identifier === joystickTouchId) handleJoystickMove(touch);
+  }
+}, { passive: false });
+
+joystickZone.addEventListener('touchend', e => {
+  for (const touch of e.changedTouches) {
+    if (touch.identifier === joystickTouchId) {
+      joystickTouchId = null;
+      touchState.steerX = 0;
+      touchState.steerY = 0;
+      touchState.joystickActive = false;
+      const zoneW = joystickZone.getBoundingClientRect().width;
+      joystickKnob.style.left = (zoneW / 2) + 'px';
+      joystickKnob.style.top = (zoneW / 2) + 'px';
+    }
+  }
+});
+
+function handleJoystickMove(touch) {
+  const rect = joystickZone.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  let dx = touch.clientX - cx;
+  let dy = touch.clientY - cy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const maxDist = 55;
+  if (dist > maxDist) { dx = dx / dist * maxDist; dy = dy / dist * maxDist; }
+  touchState.steerX = dx / maxDist;
+  touchState.steerY = dy / maxDist;
+  // Joystick as directional: compute target angle and auto-accelerate
+  const deadzone = 0.25;
+  if (dist / maxDist > deadzone) {
+    touchState.joystickActive = true;
+    // Screen coords: dx right=+, dy down=+. Game angle: atan2(dz, dx) with z inverted
+    touchState.joystickAngle = Math.atan2(-dx, -dy); // maps to game world direction
+  } else {
+    touchState.joystickActive = false;
+  }
+  const knobCenter = joystickZone.getBoundingClientRect().width / 2;
+  joystickKnob.style.left = (knobCenter + dx) + 'px';
+  joystickKnob.style.top = (knobCenter + dy) + 'px';
+}
+
+// Brake button
+const brakeBtn = document.getElementById('brake-btn');
+brakeBtn.addEventListener('touchstart', e => { e.preventDefault(); touchState.brake = true; brakeBtn.classList.add('active'); }, { passive: false });
+brakeBtn.addEventListener('touchend', e => { touchState.brake = false; brakeBtn.classList.remove('active'); });
+brakeBtn.addEventListener('touchcancel', e => { touchState.brake = false; brakeBtn.classList.remove('active'); });
+
+// Prevent zoom/scroll on mobile
+document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
+// ── Car Physics ──
+let carAngle = 0;       // direction car faces
+let moveAngle = 0;      // direction car actually moves
+let driftAmount = 0;    // 0 = no drift, 1 = full drift
+let carSpeed = 0;
+const MAX_SPEED = 0.833;       // ~150 km/h
+const ACCELERATION = 0.018;
+const BRAKE_FORCE = 0.035;
+const FRICTION = 0.003;
+const TURN_SPEED = 0.028;
+const REVERSE_MAX = 0.25;
+const DRIFT_GRIP_RECOVERY = 0.02;
+const DRIFT_SLIDE_FACTOR = 0.92;   // higher = more slide
+const AUTO_DRIFT_SPEED = 0.44;     // ~80 km/h threshold
+
+// ── Game State ──
+let gameStarted = false;
+let gamePaused = false;
+
+function togglePause() {
+  if (!gameStarted || gameOver) return;
+  gamePaused = !gamePaused;
+  document.getElementById('pause-screen').style.display = gamePaused ? 'flex' : 'none';
+  if (!gamePaused) clock.getDelta(); // eat accumulated delta
+}
+
+// Start screen best score
+const startBestEl = document.getElementById('start-best');
+const startBestValEl = document.getElementById('start-best-val');
+if (bestScore > 0) {
+  startBestEl.classList.remove('hidden');
+  startBestValEl.textContent = bestScore;
+}
+
+function startGame() {
+  if (gameStarted) return;
+  gameStarted = true;
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('pause-btn').style.display = 'flex';
+}
+
+document.getElementById('start-screen').addEventListener('click', startGame);
+document.getElementById('start-screen').addEventListener('touchstart', e => { e.preventDefault(); startGame(); });
+document.getElementById('pause-btn').addEventListener('click', togglePause);
+document.getElementById('pause-btn').addEventListener('touchstart', e => { e.preventDefault(); togglePause(); });
+document.getElementById('pause-screen').addEventListener('click', togglePause);
+document.getElementById('pause-screen').addEventListener('touchstart', e => { e.preventDefault(); togglePause(); });
+window.addEventListener('keydown', e => {
+  if (!gameStarted && e.code !== 'F5' && e.code !== 'F12' && e.code !== 'Escape') startGame();
+  if (e.code === 'Escape' && gameStarted) togglePause();
+});
+
+// ── Minimap ──
+const minimapCanvas = document.getElementById('minimap-canvas');
+const minimapCtx = minimapCanvas.getContext('2d');
+
+function drawMinimap() {
+  const mc = minimapCtx;
+  const size = 150;
+  const viewRadius = 250;
+  const scale = size / (viewRadius * 2);
+  const px = car.position.x;
+  const pz = car.position.z;
+
+  mc.clearRect(0, 0, size, size);
+
+  // Background
+  mc.fillStyle = 'rgba(232, 193, 112, 0.3)';
+  mc.beginPath();
+  mc.arc(75, 75, 73, 0, Math.PI * 2);
+  mc.fill();
+
+  // Car (always center)
+  mc.save();
+  mc.translate(75, 75);
+  mc.rotate(-carAngle + Math.PI / 2);
+  mc.fillStyle = '#c0392b';
+  mc.fillRect(-3, -2, 6, 4);
+  mc.restore();
+
+  // Direction indicator
+  const ddx = 75 + Math.cos(carAngle) * 8;
+  const ddy = 75 - Math.sin(carAngle) * 8;
+  mc.strokeStyle = 'rgba(244, 162, 97, 0.8)';
+  mc.lineWidth = 1.5;
+  mc.beginPath();
+  mc.moveTo(75, 75);
+  mc.lineTo(ddx, ddy);
+  mc.stroke();
+
+  // Worms as red dots
+  mc.fillStyle = 'rgba(231, 76, 60, 0.9)';
+  worms.forEach(w => {
+    const wx = 75 + (w.mesh.position.x - px) * scale;
+    const wy = 75 + (w.mesh.position.z - pz) * scale;
+    if (Math.hypot(wx - 75, wy - 75) < 72) {
+      mc.beginPath();
+      mc.arc(wx, wy, 3, 0, Math.PI * 2);
+      mc.fill();
+    }
+  });
+
+  // Coins as gold dots
+  mc.fillStyle = 'rgba(241, 196, 15, 0.9)';
+  coins.forEach(c => {
+    if (c.collected) return;
+    const coinX = 75 + (c.x - px) * scale;
+    const coinY = 75 + (c.z - pz) * scale;
+    if (Math.hypot(coinX - 75, coinY - 75) < 72) {
+      mc.beginPath();
+      mc.arc(coinX, coinY, 2, 0, Math.PI * 2);
+      mc.fill();
+    }
+  });
+
+  // Camels as brown dots
+  mc.fillStyle = 'rgba(196, 149, 106, 0.9)';
+  camels.forEach(c => {
+    const camelX = 75 + (c.mesh.position.x - px) * scale;
+    const camelY = 75 + (c.mesh.position.z - pz) * scale;
+    if (Math.hypot(camelX - 75, camelY - 75) < 72) {
+      mc.beginPath();
+      mc.arc(camelX, camelY, 3, 0, Math.PI * 2);
+      mc.fill();
+    }
+  });
+
+  // Mega worm as pulsing big red dot
+  if (megaWorm && megaWorm.emerged) {
+    mc.fillStyle = 'rgba(255, 40, 40, 0.9)';
+    const mx = 75 + (megaWorm.segs[0].x - px) * scale;
+    const my = 75 + (megaWorm.segs[0].z - pz) * scale;
+    if (Math.hypot(mx - 75, my - 75) < 72) {
+      const pulseR = 4 + Math.sin(Date.now() * 0.008) * 1.5;
+      mc.beginPath();
+      mc.arc(mx, my, pulseR, 0, Math.PI * 2);
+      mc.fill();
+    }
+  }
+}
+
+// ── Game Loop ──
+const clock = new THREE.Clock();
+let hintOpacity = 1;
+const controlsHint = document.getElementById('controls-hint');
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = Math.min(clock.getDelta(), 0.05);
+
+  if (!gameStarted) {
+    // Slow camera pan on start screen
+    const t = clock.elapsedTime * 0.1;
+    camera.position.set(60 + Math.sin(t) * 10, 60, 60 + Math.cos(t) * 10);
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+    return;
+  }
+
+  if (gameOver) {
+    renderer.render(scene, camera);
+    return;
+  }
+
+  if (gamePaused) {
+    renderer.render(scene, camera);
+    return;
+  }
+
+  // Hit cooldown
+  if (hitCooldown > 0) {
+    hitCooldown -= delta;
+    // Blink car during invulnerability
+    car.visible = Math.floor(hitCooldown * 10) % 2 === 0;
+  } else {
+    car.visible = true;
+  }
+
+  // ── Sandworms ──
+  updateWorms(delta);
+  updateMegaWorm(delta);
+
+  // ── Day/Night Cycle ──
+  updateDayNight(delta);
+
+  // ── Camels ──
+  updateCamels(delta);
+  checkCamelCollisions();
+
+  // ── Coins ──
+  updateCoins(delta);
+
+  // ── Car Controls (keyboard + touch) ──
+  const kbForward = keys['KeyW'] || keys['ArrowUp'];
+  const kbBackward = keys['KeyS'] || keys['ArrowDown'];
+  const kbLeft = keys['KeyA'] || keys['ArrowLeft'];
+  const kbRight = keys['KeyD'] || keys['ArrowRight'];
+  const brake = keys['Space'] || touchState.brake;
+
+  // Joystick directional mode: auto-accelerate and point car toward joystick direction
+  let forward = kbForward;
+  let backward = kbBackward;
+  let left = kbLeft;
+  let right = kbRight;
+  let joystickSteering = false;
+
+  if (touchState.joystickActive) {
+    forward = true; // auto-accelerate
+    // Map joystick screen angle to game world angle (isometric offset ~3π/4)
+    const targetAngle = touchState.joystickAngle + Math.PI * 0.75;
+    // Shortest angle difference
+    let angleDiff = targetAngle - carAngle;
+    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+    // Smooth rotation toward target
+    const steerSpeed = 0.08 + Math.abs(carSpeed) / MAX_SPEED * 0.04;
+    carAngle += angleDiff * steerSpeed;
+    // Flag that we're joystick-steering (for drift detection)
+    joystickSteering = Math.abs(angleDiff) > 0.15;
+    left = angleDiff > 0.05;
+    right = angleDiff < -0.05;
+  }
+
+  const touchSteerAmount = Math.abs(touchState.steerX);
+
+  if (forward) {
+    const currentKmh = Math.abs(carSpeed * 180);
+    // Gradual to 80, then kicks harder to 150
+    const accel = currentKmh < 80 ? 0.007 : 0.022;
+    carSpeed = Math.min(carSpeed + accel, MAX_SPEED);
+  } else if (backward) {
+    carSpeed = Math.max(carSpeed - ACCELERATION, -REVERSE_MAX);
+  }
+
+  if (brake) {
+    if (carSpeed > 0) carSpeed = Math.max(0, carSpeed - BRAKE_FORCE);
+    else if (carSpeed < 0) carSpeed = Math.min(0, carSpeed + BRAKE_FORCE);
+  }
+
+  // Friction
+  if (!forward && !backward && !brake) {
+    if (carSpeed > 0) carSpeed = Math.max(0, carSpeed - FRICTION);
+    else if (carSpeed < 0) carSpeed = Math.min(0, carSpeed + FRICTION);
+  }
+
+  // Keyboard turning (joystick handles its own steering above)
+  if (!touchState.joystickActive) {
+    const speedRatio = Math.abs(carSpeed) / MAX_SPEED;
+    const baseTurn = TURN_SPEED * Math.min(speedRatio * 1.5, 1);
+    const turnMult = touchSteerAmount > 0.1 ? touchSteerAmount : 1;
+    const driftTurnBoost = Math.abs(carSpeed) > AUTO_DRIFT_SPEED && (left || right) ? 1.6 : 1.0;
+    if (left && Math.abs(carSpeed) > 0.01) carAngle += baseTurn * turnMult * driftTurnBoost * Math.sign(carSpeed);
+    if (right && Math.abs(carSpeed) > 0.01) carAngle -= baseTurn * turnMult * driftTurnBoost * Math.sign(carSpeed);
+  }
+
+  // ── Auto Drift ──
+  const isTurning = left || right || joystickSteering;
+  const isHighSpeed = Math.abs(carSpeed) > AUTO_DRIFT_SPEED;
+  const shouldDrift = isTurning && isHighSpeed;
+
+  if (shouldDrift) {
+    // Drift intensity scales with speed
+    const driftIntensity = Math.min(1, (Math.abs(carSpeed) - AUTO_DRIFT_SPEED) / (MAX_SPEED - AUTO_DRIFT_SPEED));
+    driftAmount = Math.min(1, driftAmount + 0.04 + driftIntensity * 0.03);
+    // Movement angle lags behind — the slide
+    const angleDiff = carAngle - moveAngle;
+    const slideFactor = DRIFT_SLIDE_FACTOR + driftIntensity * 0.04; // more speed = more slide
+    moveAngle += angleDiff * (1 - slideFactor);
+    // No speed loss — sand is slippery!
+  } else {
+    driftAmount = Math.max(0, driftAmount - DRIFT_GRIP_RECOVERY);
+    // Grip recovers — moveAngle catches up
+    const angleDiff = carAngle - moveAngle;
+    moveAngle += angleDiff * (0.12 + (1 - driftAmount) * 0.88);
+  }
+
+  // Drift indicator
+  const driftEl = document.getElementById('drift-indicator');
+  if (driftAmount > 0.2) {
+    driftEl.style.opacity = Math.min(1, driftAmount * 1.5);
+  } else {
+    driftEl.style.opacity = '0';
+  }
+
+  // Move car — blend moveAngle toward carAngle based on drift
+  const effectiveAngle = moveAngle + (carAngle - moveAngle) * (1 - driftAmount * 0.75);
+  const dx = Math.cos(effectiveAngle) * carSpeed;
+  const dz = -Math.sin(effectiveAngle) * carSpeed;
+
+  // No world bounds — infinite map
+  const newX = car.position.x + dx;
+  const newZ = car.position.z + dz;
+
+  // Collision check
+  let collision = false;
+  const carPos2D = new THREE.Vector2(newX, newZ);
+  const displaySpeedNow = Math.abs(carSpeed * 180);
+
+  for (let oi = obstacles.length - 1; oi >= 0; oi--) {
+    const obs = obstacles[oi];
+    if (carPos2D.distanceTo(obs.pos) < obs.radius + 1.0) {
+      if (displaySpeedNow > 50) {
+        // High speed: destroy obstacle
+        destroyObstacle(obs, oi);
+        // Rocks slow you way more than cactus
+        carSpeed *= obs.type === 'rock' ? 0.25 : 0.7;
+      } else {
+        // Low speed: solid collision, bounce
+        collision = true;
+      }
+      break;
+    }
+  }
+
+  if (!collision) {
+    car.position.x = newX;
+    car.position.z = newZ;
+  } else {
+    carSpeed *= -0.3; // Bounce back
+  }
+
+  // Terrain height — car rides over dunes, never sinks
+  const terrainY = getTerrainHeight(car.position.x, car.position.z);
+  const targetY = Math.max(0.1, terrainY + 0.1);
+  car.position.y += (targetY - car.position.y) * 0.15;
+  if (car.position.y < 0.1) car.position.y = 0.1;
+
+  // Slope speed penalty (gentle)
+  const aheadX = car.position.x + Math.cos(carAngle) * 3;
+  const aheadZ = car.position.z - Math.sin(carAngle) * 3;
+  const slopeAhead = getTerrainHeight(aheadX, aheadZ) - terrainY;
+  if (slopeAhead > 0 && carSpeed > 0) {
+    carSpeed *= (1 - slopeAhead * 0.15); // Gentle uphill drag
+  } else if (slopeAhead < 0 && carSpeed > 0) {
+    carSpeed = Math.min(MAX_SPEED, carSpeed + Math.abs(slopeAhead) * 0.002);
+  }
+
+  // Pitch car based on slope (very subtle)
+  const behindX = car.position.x - Math.cos(carAngle) * 2.5;
+  const behindZ = car.position.z + Math.sin(carAngle) * 2.5;
+  const pitchSlope = (getTerrainHeight(aheadX, aheadZ) - getTerrainHeight(behindX, behindZ)) / 5.5;
+  const targetPitch = -pitchSlope * 0.25;
+  car.rotation.x += (targetPitch - car.rotation.x) * 0.06;
+
+  car.rotation.y = carAngle;
+
+  // Car tilt on turns — much stronger during drift
+  const baseTilt = left ? 0.05 : right ? -0.05 : 0;
+  const driftTilt = driftAmount * (left ? 0.12 : right ? -0.12 : 0);
+  const tiltTarget = baseTilt + driftTilt;
+  car.rotation.z += (tiltTarget * Math.abs(carSpeed) / MAX_SPEED - car.rotation.z) * 0.12;
+
+  // Wheel spin
+  const wheelSpin = carSpeed * 8;
+  wheels.forEach(w => { w.rotation.y += wheelSpin; });
+
+  // ── Dust (extra during drift) ──
+  const dustChance = driftAmount > 0.3
+    ? Math.min(1, Math.abs(carSpeed) / MAX_SPEED + driftAmount * 0.8)
+    : Math.abs(carSpeed) / MAX_SPEED;
+  if (Math.abs(carSpeed) > 0.05) {
+    if (Math.random() < dustChance) spawnDust();
+    // Extra drift dust from sides
+    if (driftAmount > 0.3 && Math.random() < driftAmount * 0.6) {
+      spawnDust();
+      spawnDust();
+    }
+  }
+
+  for (let i = dustParticles.length - 1; i >= 0; i--) {
+    const d = dustParticles[i];
+    d.life -= delta * 1.2;
+    d.mesh.position.y += d.vy * delta;
+    d.vy *= 0.97;
+    d.mesh.material.opacity = d.life * 0.6;
+    d.mesh.scale.setScalar(d.scale * (2 - d.life));
+    if (d.life <= 0) {
+      scene.remove(d.mesh);
+      d.mesh.material.dispose();
+      dustParticles.splice(i, 1);
+    }
+  }
+
+  // ── Debris ──
+  updateDebris(delta);
+
+  // ── Tumbleweeds ──
+  tumbleweeds.forEach(tw => {
+    tw.mesh.position.x += tw.vx * delta;
+    tw.mesh.position.z += tw.vz * delta;
+    tw.mesh.rotation.x += tw.vx * delta * 2;
+    tw.mesh.rotation.z += tw.vz * delta * 2;
+
+    // Recycle if too far from car
+    const dist = Math.hypot(tw.mesh.position.x - car.position.x, tw.mesh.position.z - car.position.z);
+    if (dist > 200) {
+      const a = Math.random() * Math.PI * 2;
+      tw.mesh.position.x = car.position.x + Math.cos(a) * (80 + Math.random() * 100);
+      tw.mesh.position.z = car.position.z + Math.sin(a) * (80 + Math.random() * 100);
+    }
+  });
+
+  // ── Recycle distant objects (obstacles, dunes, coins, camels) ──
+  const RECYCLE_DIST = 200;
+  const SPAWN_DIST_MIN = 80;
+  const SPAWN_DIST_MAX = 180;
+
+  // Recycle obstacles
+  obstacles.forEach(obs => {
+    const dist = Math.hypot(obs.pos.x - car.position.x, obs.pos.y - car.position.z);
+    if (dist > RECYCLE_DIST) {
+      const a = Math.random() * Math.PI * 2;
+      const d = SPAWN_DIST_MIN + Math.random() * (SPAWN_DIST_MAX - SPAWN_DIST_MIN);
+      const nx = car.position.x + Math.cos(a) * d;
+      const nz = car.position.z + Math.sin(a) * d;
+      obs.mesh.position.x = nx;
+      obs.mesh.position.z = nz;
+      obs.pos.set(nx, nz);
+    }
+  });
+
+  // Recycle dunes
+  dunes.forEach(d => {
+    const dist = Math.hypot(d.x - car.position.x, d.z - car.position.z);
+    if (dist > RECYCLE_DIST) {
+      const a = Math.random() * Math.PI * 2;
+      const dd = SPAWN_DIST_MIN + Math.random() * (SPAWN_DIST_MAX - SPAWN_DIST_MIN);
+      d.x = car.position.x + Math.cos(a) * dd;
+      d.z = car.position.z + Math.sin(a) * dd;
+      d.mesh.position.x = d.x;
+      d.mesh.position.z = d.z;
+    }
+  });
+
+  // Recycle coins too far away
+  for (let i = coins.length - 1; i >= 0; i--) {
+    const c = coins[i];
+    const dist = Math.hypot(c.x - car.position.x, c.z - car.position.z);
+    if (dist > RECYCLE_DIST) {
+      scene.remove(c.mesh);
+      coins.splice(i, 1);
+    }
+  }
+
+  // Recycle camels
+  camels.forEach(c => {
+    const dist = Math.hypot(c.mesh.position.x - car.position.x, c.mesh.position.z - car.position.z);
+    if (dist > RECYCLE_DIST) {
+      const a = Math.random() * Math.PI * 2;
+      const d = SPAWN_DIST_MIN + Math.random() * (SPAWN_DIST_MAX - SPAWN_DIST_MIN);
+      c.mesh.position.x = car.position.x + Math.cos(a) * d;
+      c.mesh.position.z = car.position.z + Math.sin(a) * d;
+      c.walkAngle = a + Math.PI; // face inward
+    }
+  });
+
+  // ── Camera Follow ──
+  const camOffset = new THREE.Vector3(60, 60, 60);
+  const targetCamPos = car.position.clone().add(camOffset);
+  camera.position.lerp(targetCamPos, 0.08);
+  camera.lookAt(car.position.x, car.position.y, car.position.z);
+
+  // Ground follows car
+  ground.position.x = car.position.x;
+  ground.position.z = car.position.z;
+
+  // Shadow follow
+  sunLight.position.set(car.position.x + 50, 80, car.position.z + 30);
+  sunLight.target.position.copy(car.position);
+  sunLight.target.updateMatrixWorld();
+
+  // ── HUD ──
+  const displaySpeed = Math.abs(Math.round(carSpeed * 180));
+  document.getElementById('speed-value').textContent = displaySpeed;
+
+  // Fade controls hint
+  if (Math.abs(carSpeed) > 0.1 && hintOpacity > 0) {
+    hintOpacity = Math.max(0, hintOpacity - delta * 0.5);
+    controlsHint.style.opacity = hintOpacity;
+  }
+
+  // Minimap
+  drawMinimap();
+
+  renderer.render(scene, camera);
+}
+
+// ── Resize ──
+window.addEventListener('resize', () => {
+  const aspect = window.innerWidth / window.innerHeight;
+  camera.left = -frustumSize * aspect / 2;
+  camera.right = frustumSize * aspect / 2;
+  camera.top = frustumSize / 2;
+  camera.bottom = -frustumSize / 2;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+animate();
+</script>
+</body>
+</html>
